@@ -9,20 +9,26 @@ document.addEventListener('mouseup', function() {
 let responseDiv = document.createElement('div');
 responseDiv.id = 'responseDiv';
 responseDiv.style.position = 'fixed';
-responseDiv.style.bottom = '10px';
-responseDiv.style.right = '10px';
-responseDiv.style.width = '300px';
-responseDiv.style.maxHeight = '200px';
+responseDiv.style.bottom = '20px';
+responseDiv.style.right = '20px';
+responseDiv.style.width = '400px';
+responseDiv.style.maxHeight = '400px';
 responseDiv.style.overflowY = 'auto';
-responseDiv.style.backgroundColor = '#ffffff';
-responseDiv.style.border = '1px solid black';
-responseDiv.style.padding = '10px';
+responseDiv.style.backgroundColor = '#c9d1d9';
+responseDiv.style.border = '1px solid #30363d';
+responseDiv.style.borderRadius = '6px';
+responseDiv.style.padding = '16px';
 responseDiv.style.zIndex = '1000';
 responseDiv.textContent = "Response from LLM will be displayed here";
 responseDiv.style.fontFamily = '-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji"';
 responseDiv.style.fontSize = '14px';
 responseDiv.style.lineHeight = '1.5';
-responseDiv.style.color = '#c9d1d9';
+responseDiv.style.color = '#0d1117';
+responseDiv.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+responseDiv.style.transition = 'all 0.3s ease';
+// responseDiv.style.opacity = '0';
+responseDiv.style.transform = 'translateY(20px)';
+
 
 document.body.appendChild(responseDiv);
 
