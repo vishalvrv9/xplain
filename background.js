@@ -1,7 +1,16 @@
+//abort controller to stop generation
+// https://developer.mozilla.org/en-US/docs/Web/API/AbortController
+let abortController = new AbortController();
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action === "processCode") {
     //   alert("Received code: " + request.code);
     sendToLocalLLM(request.code);
+  } else if (request.action === "stopGeneration") {
+    if (abortController) {
+      abortController.abort();
+      abortController = null;
+    }
   }
 });
 
@@ -33,9 +42,12 @@ async function sendToLocalLLM(code) {
   const llmlxEndpoint = `${baseUrl}?${params.toString()}`;
   console.log(llmlxEndpoint);
 
+  abortController = new AbortController();
+
   try {
     const response = await fetch(llmlxEndpoint, {
       method: "GET",
+      signal: abortController.signal,
     });
 
     if (!response.ok) {
@@ -63,14 +75,36 @@ async function sendToLocalLLM(code) {
       });
     }
     console.log(fullResponse);
-  } catch (error) {
-    console.error(error);
-    //sending error to content script
+
+    // if generation is complete, simulate click on stop button
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {
-        action: "error",
-        error: error.toString(),
+        action: "generationComplete",
       });
     });
+  } catch (error) {
+    console.error(error);
+    if (error.name === "AbortError") {
+      //aborted by user so abort gracefully
+      console.log("Generation stopped by user");
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "updateResponse",
+        chunk: "\n\nGeneration stopped",
+      });
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "generationComplete",
+        chunk: "\n\nGeneration stopped",
+      });
+    } else {
+      //sending error to content script
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "error",
+          error: error.toString(),
+        });
+      });
+    }
+  }finally{
+    abortController = null;
   }
 }
